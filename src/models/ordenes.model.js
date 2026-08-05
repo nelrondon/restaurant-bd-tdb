@@ -1,5 +1,6 @@
 const { withTransaction } = require("../postgres");
 const { ESTADOS_ACTIVOS } = require("../schemas/orden.schema");
+const N8nService = require("../services/n8n.service");
 
 const IVA = 0.16;
 
@@ -221,14 +222,39 @@ class OrdenesModel {
     return withTransaction(async client => {
       const result = await client.query(
         `UPDATE pedido SET estado_orden = $1 WHERE id_pedido = $2
-         RETURNING id_pedido, estado_orden`,
+         RETURNING id_pedido, estado_orden, num_ticket, cedula_cliente`,
         [estatus, idPedido]
       );
       if (result.rows.length === 0) return null;
 
+      const { id_pedido, estado_orden, num_ticket, cedula_cliente } = result.rows[0];
+
+      let clienteNombre = null;
+      let clienteTelefono = null;
+      if (cedula_cliente) {
+        const clienteRes = await client.query(
+          "SELECT nombre, telefono FROM cliente WHERE cedula_cliente = $1",
+          [cedula_cliente]
+        );
+        if (clienteRes.rows.length > 0) {
+          clienteNombre = clienteRes.rows[0].nombre;
+          clienteTelefono = clienteRes.rows[0].telefono;
+        }
+      }
+
+      setTimeout(() => {
+        N8nService.notificarCambioEstatus({
+          idPedido: id_pedido,
+          numTicket: num_ticket,
+          nuevoEstado: estado_orden,
+          clienteNombre,
+          clienteTelefono
+        });
+      }, 0);
+
       return {
-        id_pedido: result.rows[0].id_pedido,
-        Estatus_Orden: result.rows[0].estado_orden
+        id_pedido: id_pedido,
+        Estatus_Orden: estado_orden
       };
     });
   }

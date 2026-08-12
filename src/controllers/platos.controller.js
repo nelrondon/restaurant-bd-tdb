@@ -59,6 +59,43 @@ class PlatosController {
       });
     }
   }
+
+  static async remove(req, res) {
+    const parsedId = platoIdParamSchema.safeParse(req.params.id);
+    if (!parsedId.success) {
+      res.status(400).send({ message: "ID de plato inválida" });
+      return;
+    }
+
+    try {
+      const plato = await PlatosModel.delete(parsedId.data);
+      if (!plato) {
+        res.status(404).send({ message: "Plato no encontrado" });
+        return;
+      }
+
+      res.send({
+        message: "El plato ha sido eliminado satisfactoriamente",
+        data: plato
+      });
+    } catch (error) {
+      console.log(error);
+
+      // Postgres code 23503: Violación de llave foránea (detalle_pedido, receta)
+      if (error.code === "23503") {
+        res.status(409).send({
+          message:
+            "No se puede eliminar el plato porque está asociado a órdenes o recetas existentes"
+        });
+        return;
+      }
+
+      res.status(500).send({
+        message: "Ha ocurrido un error interno al eliminar el plato",
+        error: error.message
+      });
+    }
+  }
 }
 
 module.exports = PlatosController;

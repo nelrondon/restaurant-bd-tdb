@@ -26,6 +26,16 @@ class PlatosModel {
       return result.rows[0];
     });
   }
+
+  static async delete(idPlato) {
+    return withTransaction(async client => {
+      const result = await client.query(
+        "DELETE FROM plato WHERE id_plato = $1 RETURNING *",
+        [idPlato]
+      );
+      return result.rows[0] ?? null;
+    });
+  }
 }
 
 module.exports = PlatosModel;

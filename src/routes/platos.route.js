@@ -181,4 +181,80 @@ router.get("/:id", PlatosController.getById);
  */
 router.post("/", PlatosController.create);
 
+/**
+ * @swagger
+ * /platos/{id}:
+ *   delete:
+ *     summary: Eliminar un plato
+ *     description: >
+ *       Elimina un plato del menú según su ID. No se podrá eliminar si el plato
+ *       ya forma parte de alguna orden o receta registrada.
+ *     tags: [Platos]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID del plato a eliminar
+ *     responses:
+ *       200:
+ *         description: Plato eliminado satisfactoriamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: El plato ha sido eliminado satisfactoriamente
+ *                 data:
+ *                   $ref: '#/components/schemas/Plato'
+ *       400:
+ *         description: El ID proporcionado no es un número válido
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: ID de plato inválida
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       404:
+ *         description: No existe un plato con ese ID
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Plato no encontrado
+ *       409:
+ *         description: El plato está asociado a órdenes o recetas y no puede eliminarse
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: No se puede eliminar el plato porque está asociado a órdenes o recetas existentes
+ *       500:
+ *         description: Error interno al intentar eliminar el plato
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Ha ocurrido un error interno al eliminar el plato
+ *                 error:
+ *                   type: string
+ */
+router.delete("/:id", PlatosController.remove);
+
 module.exports = router;

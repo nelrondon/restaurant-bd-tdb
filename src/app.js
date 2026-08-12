@@ -51,6 +51,7 @@ class App {
 
   registerRoutes() {
     this.app
+      .use("/swagger/json", (req, res) => res.send(swaggerSpec))
       .use("/swagger/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec))
       .use(route("/ordenes"), ordenesRouter)
       .use(route("/platos"), this.authorizationMiddleware, platosRouter)
@@ -59,7 +60,11 @@ class App {
       .use(route("/registro-cliente"), this.authorizationMiddleware, clientesRouter)
       .use(route("/facturas"), this.authorizationMiddleware, facturasRouter)
       .use(route("/inventario"), this.authorizationMiddleware, inventarioRouter)
-      .use(route("/proveedores"), this.authorizationMiddleware, require("./routes/proveedores.route.js"))
+      .use(
+        route("/proveedores"),
+        this.authorizationMiddleware,
+        require("./routes/proveedores.route.js")
+      )
       .use(route("/reportes"), this.authorizationMiddleware, reportesRouter)
       .use(route("/"), this.authorizationMiddleware, indexRouter);
   }

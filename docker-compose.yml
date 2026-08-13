@@ -14,7 +14,6 @@ services:
       dockerfile: Dockerfile
       args:
         VITE_API_URL: ""
-        VITE_API_KEY: ${API_KEY}
     container_name: frontend_restaurante
     restart: always
     ports:
@@ -63,9 +62,16 @@ services:
       - "3000:3000"
     environment:
       PORT: ${PORT:-3000}
-      API_KEY: ${API_KEY:-tu_clave_api_secreta}
       DATABASE_URL: ${DATABASE_URL:-postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db_restaurante:5432/${POSTGRES_DB:-tradiciones_sabores_db}}
       POSTGRES_URL: ${POSTGRES_URL:-postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db_restaurante:5432/${POSTGRES_DB:-tradiciones_sabores_db}}
+      # Autenticación de empleados. Sin JWT_ACCESS_SECRET la API no arranca
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
+      JWT_ACCESS_TTL: ${JWT_ACCESS_TTL:-900}
+      REFRESH_TTL_DIAS: ${REFRESH_TTL_DIAS:-30}
+      BCRYPT_COST: ${BCRYPT_COST:-12}
+      CORS_ORIGIN: ${CORS_ORIGIN:-*}
+      # nginx va por delante: sin esto el rate limit vería siempre la IP del proxy
+      TRUST_PROXY: ${TRUST_PROXY:-1}
     depends_on:
       db_restaurante:
         condition: service_healthy

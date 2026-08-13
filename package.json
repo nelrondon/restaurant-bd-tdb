@@ -7,6 +7,7 @@
     "start": "node src/index.js",
     "start:dev": "nodemon src/index.js",
     "seed": "node seed/seed.js",
+    "seed:usuarios": "node seed/usuarios.js",
     "prettier": "prettier --write ."
   },
   "repository": {
@@ -21,9 +22,12 @@
   },
   "homepage": "https://github.com/nelrondon/restaurant-bd-tdb#readme",
   "dependencies": {
+    "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "express-rate-limit": "^8.6.2",
+    "jsonwebtoken": "^9.0.3",
     "pg": "^8.22.0",
     "pg-format": "^1.0.4",
     "prettier": "^3.9.5",

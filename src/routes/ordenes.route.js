@@ -1,5 +1,7 @@
 const { Router } = require("express");
 const OrdenesController = require("../controllers/ordenes.controller");
+const { requiereAuth } = require("../auth/middleware");
+const { limiteCrearOrden, limiteConsultaOrdenes } = require("../auth/rate-limit");
 
 const router = Router();
 
@@ -97,8 +99,10 @@ const router = Router();
  *     description: >
  *       Devuelve todas las órdenes con el detalle de sus ítems, ordenadas de la
  *       más reciente a la más antigua. Se puede filtrar por estatus.
+ *       Exige sesión iniciada: es la lista completa del salón, con los datos de todos
+ *       los clientes. Para que un cliente consulte sus propios pedidos está
+ *       GET /ordenes/consulta.
  *     tags: [Ordenes]
- *     security: []
  *     parameters:
  *       - in: query
  *         name: estatus
@@ -121,15 +125,76 @@ const router = Router();
  *                 $ref: '#/components/schemas/Orden'
  *       400:
  *         description: El valor de "estatus" no es válido
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       403:
+ *         $ref: '#/components/responses/ForbiddenError'
  */
-router.get("/", OrdenesController.getAll);
+router.get("/", requiereAuth, OrdenesController.getAll);
+
+/**
+ * @swagger
+ * /ordenes/consulta:
+ *   get:
+ *     summary: Consultar los pedidos de una cédula (menú digital)
+ *     description: >
+ *       Ruta pública acotada para que el cliente siga sus propios pedidos desde su
+ *       teléfono. Devuelve solo los pedidos de la cédula indicada y solo los campos
+ *       necesarios (ticket, hora, estatus y total), sin datos personales ni el detalle
+ *       de los ítems. Reemplaza el uso de GET /ordenes desde el menú del cliente, que
+ *       exponía los pedidos de todo el restaurante.
+ *     tags: [Ordenes]
+ *     security: []
+ *     parameters:
+ *       - in: query
+ *         name: cedula
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Cédula del cliente
+ *         example: V-12345678
+ *     responses:
+ *       200:
+ *         description: Pedidos de esa cédula
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   num_ticket:
+ *                     type: integer
+ *                     example: 101
+ *                   hora_creacion:
+ *                     type: string
+ *                     format: date-time
+ *                   Estatus_Orden:
+ *                     type: string
+ *                     enum: [recibido, preparando, listo, entregado, cancelado]
+ *                     example: preparando
+ *                   total:
+ *                     type: number
+ *                     format: float
+ *                     example: 19.72
+ *       400:
+ *         description: No se indicó una cédula válida
+ *       429:
+ *         description: Demasiadas consultas seguidas desde la misma IP
+ */
+router.get("/consulta", limiteConsultaOrdenes, OrdenesController.consultarPorCedula);
 
 /**
  * @swagger
  * /ordenes/{id}:
  *   get:
  *     summary: Consultar orden por ID
- *     description: Devuelve una orden puntual junto con el detalle de sus ítems.
+ *     description: >
+ *       Devuelve una orden puntual junto con el detalle de sus ítems.
+ *       Ruta pública: la usa el cliente para seguir su pedido. Con IDs secuenciales
+ *       cualquiera puede recorrerlos, así que si más adelante se quiere cerrar sin
+ *       perder el seguimiento, lo estándar es un identificador público no adivinable
+ *       (UUID o token por pedido) en vez del id_pedido.
  *     tags: [Ordenes]
  *     security: []
  *     parameters:
@@ -165,6 +230,9 @@ router.get("/:id", OrdenesController.getById);
  *       del cliente no está registrada, se da de alta con el nombre y teléfono
  *       recibidos. El nombre y el precio de cada ítem se toman del menú, por lo
  *       que "nombre" y "precio_unitario" del body se ignoran.
+ *       Ruta pública por diseño: el cliente pide desde su teléfono sin tener cuenta.
+ *       Como no hay sesión que la frene, se limita a 5 pedidos cada 10 minutos por IP,
+ *       se valida que todos los platos existan y los importes se calculan en el servidor.
  *     tags: [Ordenes]
  *     security: []
  *     requestBody:
@@ -236,10 +304,12 @@ router.get("/:id", OrdenesController.getById);
  *         description: Error de validación, o algún producto no está disponible
  *       404:
  *         description: La mesa o alguno de los productos no existe
+ *       429:
+ *         description: Demasiados pedidos seguidos desde la misma IP
  *       500:
  *         description: Error interno al crear la orden
  */
-router.post("/", OrdenesController.create);
+router.post("/", limiteCrearOrden, OrdenesController.create);
 
 /**
  * @swagger
@@ -249,9 +319,8 @@ router.post("/", OrdenesController.create);
  *     description: >
  *       Mueve la orden por el flujo recibido → preparando → listo → entregado.
  *       Acepta indistintamente los campos "Estatus_Orden" o "estado_orden", y no
- *       distingue mayúsculas de minúsculas.
+ *       distingue mayúsculas de minúsculas. Exige sesión iniciada.
  *     tags: [Ordenes]
- *     security: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -292,10 +361,14 @@ router.post("/", OrdenesController.create);
  *                   example: preparando
  *       400:
  *         description: ID inválido o estatus no especificado / no reconocido
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       403:
+ *         $ref: '#/components/responses/ForbiddenError'
  *       404:
  *         description: No existe una orden con ese ID
  */
-router.put("/:id", OrdenesController.updateStatus);
+router.put("/:id", requiereAuth, OrdenesController.updateStatus);
 
 /**
  * @swagger
@@ -305,8 +378,8 @@ router.put("/:id", OrdenesController.updateStatus);
  *     description: >
  *       Marca la orden como "cancelado". No se borra el registro, ya que la
  *       facturación y los reportes de los demás equipos siguen dependiendo de él.
+ *       Exige sesión iniciada.
  *     tags: [Ordenes]
- *     security: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -327,11 +400,15 @@ router.put("/:id", OrdenesController.updateStatus);
  *                   example: La orden 102 ha sido cancelada correctamente.
  *       400:
  *         description: El ID proporcionado no es válido
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       403:
+ *         $ref: '#/components/responses/ForbiddenError'
  *       404:
  *         description: No existe una orden con ese ID
  *       409:
  *         description: La orden ya fue cancelada, o ya fue entregada
  */
-router.delete("/:id", OrdenesController.cancel);
+router.delete("/:id", requiereAuth, OrdenesController.cancel);
 
 module.exports = router;

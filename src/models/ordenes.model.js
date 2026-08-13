@@ -127,6 +127,39 @@ class OrdenesModel {
     return withTransaction(client => buscarOrden(client, idPedido));
   }
 
+  /**
+   * Consulta pública acotada: devuelve solo los pedidos de una cédula y solo los
+   * campos que el cliente necesita para seguirlos (ticket, hora, estatus y total).
+   * No incluye datos personales ni el detalle de los ítems.
+   */
+  static async consultarPorCedula(cedula) {
+    return withTransaction(async client => {
+      const result = await client.query(
+        `SELECT
+           pedido.num_ticket,
+           pedido.hora_creacion,
+           pedido.estado_orden,
+           COALESCE(SUM(detalle_pedido.subtotal), 0) AS subtotal
+         FROM pedido
+         LEFT JOIN detalle_pedido ON detalle_pedido.num_ticket = pedido.num_ticket
+         WHERE pedido.cedula_cliente = $1
+         GROUP BY pedido.id_pedido
+         ORDER BY pedido.hora_creacion DESC, pedido.id_pedido DESC`,
+        [cedula]
+      );
+
+      return result.rows.map(row => {
+        const subtotal = redondear(Number(row.subtotal));
+        return {
+          num_ticket: row.num_ticket,
+          hora_creacion: row.hora_creacion,
+          Estatus_Orden: row.estado_orden,
+          total: redondear(subtotal + redondear(subtotal * IVA))
+        };
+      });
+    });
+  }
+
   static async create({
     cliente_nombre,
     cliente_cedula,

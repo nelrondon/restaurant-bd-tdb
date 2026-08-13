@@ -2,6 +2,7 @@ const OrdenesModel = require("../models/ordenes.model");
 const {
   ordenIdParamSchema,
   listarOrdenesQuerySchema,
+  consultarOrdenesQuerySchema,
   crearOrdenSchema,
   actualizarEstadoOrdenSchema,
   formatZodErrors
@@ -22,6 +23,20 @@ class OrdenesController {
 
     try {
       const ordenes = await OrdenesModel.getAll(parsedQuery.data);
+      return res.json(ordenes);
+    } catch (error) {
+      return internalError(res, error);
+    }
+  }
+
+  static async consultarPorCedula(req, res) {
+    const parsedQuery = consultarOrdenesQuerySchema.safeParse(req.query);
+    if (!parsedQuery.success) {
+      return res.status(400).json({ errors: formatZodErrors(parsedQuery.error) });
+    }
+
+    try {
+      const ordenes = await OrdenesModel.consultarPorCedula(parsedQuery.data.cedula);
       return res.json(ordenes);
     } catch (error) {
       return internalError(res, error);

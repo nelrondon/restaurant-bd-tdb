@@ -1,3 +1,4 @@
+const authSchemas = require("./auth.schema");
 const mesaSchemas = require("./mesa.schema");
 const platoSchemas = require("./plato.schema");
 const ordenSchemas = require("./orden.schema");
@@ -16,6 +17,7 @@ function formatZodErrors(error) {
 }
 
 module.exports = {
+  ...authSchemas,
   ...mesaSchemas,
   ...platoSchemas,
   ...ordenSchemas,

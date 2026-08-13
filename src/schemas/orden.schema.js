@@ -17,6 +17,16 @@ const listarOrdenesQuerySchema = z.object({
     .optional()
 });
 
+// Consulta pública del menú digital: solo se acepta una cédula concreta, nunca un
+// listado abierto (esa es la diferencia con GET /ordenes, que sí exige sesión).
+const consultarOrdenesQuerySchema = z.object({
+  cedula: z
+    .string({ error: "Se debe indicar la cédula del cliente" })
+    .trim()
+    .min(1, { error: "Se debe indicar la cédula del cliente" })
+    .max(20, { error: "La cédula no puede superar los 20 caracteres" })
+});
+
 const ordenItemSchema = z.object({
   id_producto: z.coerce
     .number({ error: "Cada ítem debe indicar un id_producto válido" })
@@ -132,6 +142,7 @@ module.exports = {
   ESTADOS_ACTIVOS,
   ordenIdParamSchema,
   listarOrdenesQuerySchema,
+  consultarOrdenesQuerySchema,
   crearOrdenSchema,
   actualizarEstadoOrdenSchema
 };

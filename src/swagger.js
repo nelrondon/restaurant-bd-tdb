@@ -17,6 +17,11 @@ const swaggerSpec = swaggerJsdoc({
     ],
     tags: [
       { name: "Metadatos", description: "Información general de la API" },
+      {
+        name: "Autenticación",
+        description:
+          "Inicio de sesión de empleados. La mayoría de las rutas exige una sesión iniciada (cabecera Authorization: Bearer)"
+      },
       { name: "Mesas", description: "Gestión de las mesas del restaurante" },
       { name: "Platos", description: "Gestión del menú de platos del restaurante" },
       {
@@ -27,15 +32,18 @@ const swaggerSpec = swaggerJsdoc({
     ],
     components: {
       securitySchemes: {
-        ApiKeyAuth: {
-          type: "apiKey",
-          in: "header",
-          name: "x-api-key"
+        BearerAuth: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT",
+          description:
+            "Access token devuelto por POST /auth/login. Se envía como 'Authorization: Bearer <access_token>'"
         }
       },
       responses: {
         UnauthorizedError: {
-          description: "No se proporcionó una API key válida",
+          description:
+            "No hay una sesión válida: falta el access token, está mal firmado o venció. Ante un 401 el cliente debe renovar con /auth/refresh y reintentar una sola vez",
           content: {
             "application/json": {
               schema: {
@@ -43,7 +51,24 @@ const swaggerSpec = swaggerJsdoc({
                 properties: {
                   message: {
                     type: "string",
-                    example: "No autorizado. Necesitas la llave de la API"
+                    example: "Se requiere iniciar sesión"
+                  }
+                }
+              }
+            }
+          }
+        },
+        ForbiddenError: {
+          description:
+            "Hay una sesión válida, pero no alcanza: la cuenta está desactivada o el rol es insuficiente. El cliente no debe reintentar",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  message: {
+                    type: "string",
+                    example: "La cuenta está desactivada"
                   }
                 }
               }
@@ -52,9 +77,12 @@ const swaggerSpec = swaggerJsdoc({
         }
       }
     },
+    // Por defecto toda ruta exige una sesión iniciada. Las rutas públicas
+    // (menú digital, login y refresh) lo sobrescriben con "security: []"
+    // en su propia documentación.
     security: [
       {
-        ApiKeyAuth: []
+        BearerAuth: []
       }
     ]
   },

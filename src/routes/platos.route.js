@@ -1,5 +1,6 @@
 const { Router } = require("express");
 const PlatosController = require("../controllers/platos.controller");
+const { requiereAuth } = require("../auth/middleware");
 
 const router = Router();
 
@@ -35,8 +36,12 @@ const router = Router();
  * /platos:
  *   get:
  *     summary: Listar todos los platos
- *     description: Devuelve todos los platos registrados en el menú, sin filtrar por categoría.
+ *     description: >
+ *       Devuelve todos los platos registrados en el menú, sin filtrar por categoría.
+ *       Ruta pública (no exige sesión): la consume el menú digital desde el teléfono
+ *       del cliente. Si se envía un access token, se ignora.
  *     tags: [Platos]
+ *     security: []
  *     responses:
  *       200:
  *         description: Listado de platos
@@ -56,8 +61,11 @@ router.get("/", PlatosController.getAll);
  * /platos/{id}:
  *   get:
  *     summary: Obtener un plato por ID
- *     description: Busca un plato específico del menú según su ID numérico.
+ *     description: >
+ *       Busca un plato específico del menú según su ID numérico.
+ *       Ruta pública (no exige sesión): la consume el menú digital del cliente.
  *     tags: [Platos]
+ *     security: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -166,6 +174,8 @@ router.get("/:id", PlatosController.getById);
  *                         example: precio
  *       401:
  *         $ref: '#/components/responses/UnauthorizedError'
+ *       403:
+ *         $ref: '#/components/responses/ForbiddenError'
  *       500:
  *         description: Error interno al intentar crear el plato
  *         content:
@@ -179,7 +189,7 @@ router.get("/:id", PlatosController.getById);
  *                 error:
  *                   type: string
  */
-router.post("/", PlatosController.create);
+router.post("/", requiereAuth, PlatosController.create);
 
 /**
  * @swagger
@@ -222,6 +232,8 @@ router.post("/", PlatosController.create);
  *                   example: ID de plato inválida
  *       401:
  *         $ref: '#/components/responses/UnauthorizedError'
+ *       403:
+ *         $ref: '#/components/responses/ForbiddenError'
  *       404:
  *         description: No existe un plato con ese ID
  *         content:
@@ -255,6 +267,6 @@ router.post("/", PlatosController.create);
  *                 error:
  *                   type: string
  */
-router.delete("/:id", PlatosController.remove);
+router.delete("/:id", requiereAuth, PlatosController.remove);
 
 module.exports = router;

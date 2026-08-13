@@ -8,8 +8,11 @@ const router = Router();
  * /:
  *   get:
  *     summary: Obtener los metadatos de la API
- *     description: Devuelve el nombre y la versión actual de la API
+ *     description: >
+ *       Devuelve el nombre y la versión actual de la API.
+ *       Ruta pública: no exige sesión iniciada.
  *     tags: [Metadatos]
+ *     security: []
  *     responses:
  *       200:
  *         description: Metadatos de la API

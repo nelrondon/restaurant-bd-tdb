@@ -127,7 +127,8 @@ class MesasController {
       // Postgres code 23503: Violación de llave foránea (pedido)
       if (error.code === "23503") {
         res.status(409).send({
-          message: "No se puede eliminar la mesa porque está asociada a pedidos existentes"
+          message:
+            "No se puede eliminar la mesa porque está asociada a pedidos existentes"
         });
         return;
       }

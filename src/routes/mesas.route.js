@@ -43,6 +43,8 @@ const router = Router();
  *                 $ref: '#/components/schemas/Mesa'
  *       401:
  *         $ref: '#/components/responses/UnauthorizedError'
+ *       403:
+ *         $ref: '#/components/responses/ForbiddenError'
  */
 router.get("/", MesasController.getAll);
 
@@ -79,6 +81,8 @@ router.get("/", MesasController.getAll);
  *                   example: ID de mesa inválida
  *       401:
  *         $ref: '#/components/responses/UnauthorizedError'
+ *       403:
+ *         $ref: '#/components/responses/ForbiddenError'
  *       404:
  *         description: No existe una mesa con ese ID
  *         content:
@@ -156,6 +160,8 @@ router.get("/:id", MesasController.getById);
  *                         example: capacidad
  *       401:
  *         $ref: '#/components/responses/UnauthorizedError'
+ *       403:
+ *         $ref: '#/components/responses/ForbiddenError'
  *       500:
  *         description: Error interno al intentar crear la mesa
  *         content:
@@ -254,6 +260,8 @@ router.post("/", MesasController.create);
  *                         example: estado
  *       401:
  *         $ref: '#/components/responses/UnauthorizedError'
+ *       403:
+ *         $ref: '#/components/responses/ForbiddenError'
  *       404:
  *         description: No existe una mesa con ese ID
  *         content:
@@ -320,6 +328,8 @@ router.put("/:id", MesasController.update);
  *                   example: ID de mesa inválida
  *       401:
  *         $ref: '#/components/responses/UnauthorizedError'
+ *       403:
+ *         $ref: '#/components/responses/ForbiddenError'
  *       404:
  *         description: No existe una mesa con ese ID
  *         content:

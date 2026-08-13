@@ -15,4 +15,6 @@ const createMesaSchema = z.object({
     .min(1, { error: "Se debe proveer una ubicación para la mesa" })
 });
 
-module.exports = { mesaIdParamSchema, createMesaSchema };
+const updateMesaSchema = createMesaSchema.partial();
+
+module.exports = { mesaIdParamSchema, createMesaSchema, updateMesaSchema };

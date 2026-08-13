@@ -53,7 +53,7 @@ class App {
     this.app
       .use("/swagger/json", (req, res) => res.send(swaggerSpec))
       .use("/swagger/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec))
-      .use(route("/ordenes"), ordenesRouter)
+      .use(route("/ordenes"), this.authorizationMiddleware, ordenesRouter)
       .use(route("/platos"), this.authorizationMiddleware, platosRouter)
       .use(route("/mesas"), this.authorizationMiddleware, mesasRouter)
       .use(route("/clientes"), this.authorizationMiddleware, clientesRouter)

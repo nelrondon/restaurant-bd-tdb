@@ -280,6 +280,46 @@ class OrdenesModel {
       return { id_pedido: idPedido, Estatus_Orden: "cancelado" };
     });
   }
+
+  /**
+   * Borrado duro: elimina la orden y su detalle de la base de datos.
+   *
+   * A diferencia de cancel(), aquí no queda rastro, así que se niega si la orden ya
+   * tiene factura emitida: "factura" apunta a "pedido" por num_ticket y la
+   * facturación no puede quedar huérfana. En ese caso lo correcto es cancelar.
+   *
+   * El detalle se borra a mano porque su llave foránea no está declarada
+   * ON DELETE CASCADE.
+   */
+  static async remove(idPedido) {
+    return withTransaction(async client => {
+      const actual = await client.query(
+        "SELECT id_pedido, num_ticket FROM pedido WHERE id_pedido = $1 FOR UPDATE",
+        [idPedido]
+      );
+      if (actual.rows.length === 0) return null;
+
+      const { num_ticket } = actual.rows[0];
+
+      const factura = await client.query(
+        "SELECT num_factura FROM factura WHERE num_ticket = $1",
+        [num_ticket]
+      );
+      if (factura.rows.length > 0) {
+        throw httpError(
+          409,
+          `La orden ${idPedido} ya tiene una factura emitida y no se puede eliminar. Cancélela en su lugar`
+        );
+      }
+
+      await client.query("DELETE FROM detalle_pedido WHERE num_ticket = $1", [
+        num_ticket
+      ]);
+      await client.query("DELETE FROM pedido WHERE id_pedido = $1", [idPedido]);
+
+      return { id_pedido: idPedido, num_ticket };
+    });
+  }
 }
 
 module.exports = OrdenesModel;

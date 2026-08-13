@@ -411,4 +411,60 @@ router.put("/:id", requiereAuth, OrdenesController.updateStatus);
  */
 router.delete("/:id", requiereAuth, OrdenesController.cancel);
 
+/**
+ * @swagger
+ * /ordenes/{id}/permanente:
+ *   delete:
+ *     summary: Eliminar una orden permanentemente
+ *     description: >
+ *       Borra la orden y su detalle de la base de datos, sin dejar rastro. Es una ruta
+ *       aparte de DELETE /ordenes/{id} porque esa ya está tomada por la cancelación
+ *       (soft-delete, que conserva el registro para facturación y reportes).
+ *       Se niega con 409 si la orden ya tiene una factura emitida: la facturación no
+ *       puede quedar apuntando a un pedido inexistente. Exige sesión iniciada.
+ *     tags: [Ordenes]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID del pedido (columna "id_pedido")
+ *         example: 102
+ *     responses:
+ *       200:
+ *         description: Orden eliminada
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: La orden 102 ha sido eliminada permanentemente.
+ *       400:
+ *         description: El ID proporcionado no es válido
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       403:
+ *         $ref: '#/components/responses/ForbiddenError'
+ *       404:
+ *         description: No existe una orden con ese ID
+ *       409:
+ *         description: >
+ *           La orden ya tiene factura emitida, o hay otros registros que dependen de
+ *           ella. Use la cancelación (DELETE /ordenes/{id}) en su lugar
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: La orden 102 ya tiene una factura emitida y no se puede eliminar. Cancélela en su lugar
+ *       500:
+ *         description: Error interno al eliminar la orden
+ */
+router.delete("/:id/permanente", requiereAuth, OrdenesController.remove);
+
 module.exports = router;

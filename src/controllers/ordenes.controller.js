@@ -120,6 +120,36 @@ class OrdenesController {
       return internalError(res, error);
     }
   }
+
+  // Borrado permanente, separado de cancel() porque DELETE /ordenes/:id ya está
+  // tomado por el soft-delete.
+  static async remove(req, res) {
+    const parsedId = ordenIdParamSchema.safeParse(req.params.id);
+    if (!parsedId.success) {
+      return res.status(400).json({ error: "El ID de la orden no es válido" });
+    }
+
+    try {
+      const eliminada = await OrdenesModel.remove(parsedId.data);
+      if (!eliminada) {
+        return res.status(404).json({ error: "Orden no encontrada" });
+      }
+
+      return res.json({
+        message: `La orden ${eliminada.id_pedido} ha sido eliminada permanentemente.`
+      });
+    } catch (error) {
+      // Postgres 23503: alguna otra tabla sigue apuntando a esta orden.
+      if (error.code === "23503") {
+        return res.status(409).json({
+          error:
+            "No se puede eliminar la orden porque hay registros asociados que dependen de ella"
+        });
+      }
+
+      return internalError(res, error);
+    }
+  }
 }
 
 module.exports = OrdenesController;

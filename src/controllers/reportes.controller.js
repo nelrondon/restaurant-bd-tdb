@@ -1,5 +1,5 @@
 const ReportesModel = require("../models/reportes.model");
-const { reportesPedidosQuerySchema, formatZodErrors } = require("../schemas");
+const { reportesPedidosQuerySchema } = require("../schemas");
 
 class ReportesController {
   // Obtener KPIs / Resumen ejecutivo
@@ -8,13 +8,17 @@ class ReportesController {
       const resumen = await ReportesModel.getResumen();
 
       if (!resumen) {
-        return res.status(404).json({ error: "No se encontraron datos para generar el resumen." });
+        return res
+          .status(404)
+          .json({ error: "No se encontraron datos para generar el resumen." });
       }
 
       return res.status(200).json(resumen);
     } catch (e) {
       console.error("Error al obtener resumen de reportes:", e);
-      return res.status(500).json({ error: "Fallo interno al generar el reporte de resumen." });
+      return res
+        .status(500)
+        .json({ error: "Fallo interno al generar el reporte de resumen." });
     }
   }
 
@@ -44,7 +48,9 @@ class ReportesController {
       return res.status(200).json(pedidos);
     } catch (e) {
       console.error("Error al obtener reporte de pedidos:", e);
-      return res.status(500).json({ error: "Fallo interno al generar el reporte de pedidos." });
+      return res
+        .status(500)
+        .json({ error: "Fallo interno al generar el reporte de pedidos." });
     }
   }
 }

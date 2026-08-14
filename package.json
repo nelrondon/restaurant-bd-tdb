@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node src/index.js",
     "start:dev": "nodemon src/index.js",
+    "fresh-migrations": "node scratch/run_migration.js",
     "seed:dev": "node seed/dev/seed.js",
     "seed:prod": "node seed/prod/seed.js",
     "prettier": "prettier --write ."

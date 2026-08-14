@@ -1,5 +1,8 @@
 require("dotenv").config();
 
+const crypto = require("node:crypto");
+const { hashClave, bcryptCost } = require("../../src/auth/tokens");
+
 const { pool: postgresPool, pingPostgres } = require("../../src/postgres");
 const format = require("pg-format");
 

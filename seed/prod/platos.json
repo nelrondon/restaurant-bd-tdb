@@ -1,0 +1,80 @@
+[
+    {
+        "nombre": "Arepa de Pabellón",
+        "descripcion": "Arepa rellena de carne mechada, caraotas, plátano y queso",
+        "precio": 6.50,
+        "categoria": "plato_principal"
+    },
+    {
+        "nombre": "Tequeños",
+        "descripcion": "Ración de 5 tequeños de queso con salsa de ajo",
+        "precio": 5.00,
+        "categoria": "entrada"
+    },
+    {
+        "nombre": "Cachapa con Queso de Mano",
+        "descripcion": "Cachapa tradicional venezolana con doble queso de mano",
+        "precio": 8.00,
+        "categoria": "plato_principal"
+    },
+    {
+        "nombre": "Asado Negro",
+        "descripcion": "Corte de carne en salsa oscura dulce, acompañado de arroz y puré",
+        "precio": 14.00,
+        "categoria": "plato_principal"
+    },
+    {
+        "nombre": "Empanada de Cazón",
+        "descripcion": "Empanada frita rellena de cazón margariteño",
+        "precio": 3.50,
+        "categoria": "entrada"
+    },
+    {
+        "nombre": "Sopa de Res",
+        "descripcion": "Sopa tradicional de costilla de res con verduras",
+        "precio": 9.00,
+        "categoria": "entrada"
+    },
+    {
+        "nombre": "Quesillo",
+        "descripcion": "Postre tradicional venezolano a base de leche condensada y caramelo",
+        "precio": 4.50,
+        "categoria": "postre"
+    },
+    {
+        "nombre": "Tres Leches",
+        "descripcion": "Bizcocho bañado en tres tipos de leche con merengue",
+        "precio": 5.00,
+        "categoria": "postre"
+    },
+    {
+        "nombre": "Papelón con Limón",
+        "descripcion": "Bebida refrescante de caña de azúcar y limón",
+        "precio": 2.50,
+        "categoria": "bebida"
+    },
+    {
+        "nombre": "Chicha Venezolana",
+        "descripcion": "Bebida dulce a base de arroz con leche condensada y canela",
+        "precio": 3.50,
+        "categoria": "bebida"
+    },
+    {
+        "nombre": "Arepa",
+        "descripcion": "Masa redonda y aplanada, hecha a base de harina de maíz precocida, agua y sal.",
+        "precio": 3500.00,
+        "categoria": "entrada"
+    },
+    {
+        "nombre": "Jugo de Durazno",
+        "descripcion": "Bebida dulce y refrescante hecha a partir de la pulpa de la fruta.",
+        "precio": 1000.00,
+        "categoria": "bebida"
+    },
+    {
+        "nombre": "Torta Tres Leches",
+        "descripcion": "Mezcla de leche evaporada, leche condensada y crema de leche, coronada con un brillante merengue italiano y un toque de canela espolvoreada.",
+        "precio": 5500.00,
+        "categoria": "postre"
+    }
+]

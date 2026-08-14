@@ -1,6 +1,6 @@
 require("dotenv").config();
 
-const { pool: postgresPool, pingPostgres } = require("../src/postgres");
+const { pool: postgresPool, pingPostgres } = require("../../src/postgres");
 const format = require("pg-format");
 
 const platos = require("./platos.json");

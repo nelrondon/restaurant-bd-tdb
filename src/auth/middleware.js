@@ -60,6 +60,7 @@ async function requiereAuth(req, res, next) {
     }
 
     req.usuario = { esApiKey: true, rol: "api" };
+    return next();
   }
 
   const token = leerBearer(req);
